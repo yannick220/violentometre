@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Le Violentomètre — Jeu interactif 16:9</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{font-family:Montserrat,Arial,sans-serif;color:#edf4f8;background:#08101a;--muted:#99acbe;--green:#66d9a8;--yellow:#ffca77;--red:#ff808b}
+*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;}body{min-height:100svh;display:grid;place-items:center;background:#080e16}button{font:inherit;cursor:pointer}button:focus-visible,.card:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.stage{width:min(100vw,177.7778vh);aspect-ratio:16/9;position:relative;overflow:hidden;display:flex;flex-direction:column;background:radial-gradient(ellipse at 70% -15%,#263b4d 0%,transparent 53%),#0e1722;border:1px solid #273748;box-shadow:0 30px 100px #0009;container-type:inline-size}
+.stage:before{content:"";pointer-events:none;position:absolute;inset:0;background-image:linear-gradient(#ffffff04 1px,transparent 1px),linear-gradient(90deg,#ffffff04 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(90deg,transparent,#000a,transparent)}
+.top{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;padding:2.2% 4.2% 1.35%;min-height:11%;gap:15px}.identity{display:flex;align-items:center;gap:15px}.logo{height:42px;width:42px;border-radius:13px;background:linear-gradient(125deg,#66d9a8 5%,#ffd16e 49%,#f57984);display:grid;place-items:center;color:#0b1722;font-weight:900;font-size:25px}.title{font-size:clamp(23px,2.65vw,43px);font-weight:900;letter-spacing:-.065em;line-height:1.07}.reset{width:45px;height:45px;border-radius:50%;background:#ffffff0c;border:1px solid #546477;color:#eaf3f9;display:grid;place-items:center;flex-shrink:0;transition:transform .25s,background .25s}.reset:hover{background:#ffffff22;transform:rotate(-35deg)}.reset svg{width:21px;height:21px}
+.content{position:relative;z-index:1;flex:1;min-height:0;padding:0 4.2% 3.1%;display:flex;flex-direction:column;gap:2.3%}
+.game{display:grid;grid-template-columns:37% 1fr;gap:2.3%;flex:1.05;min-height:0}.card-column{display:flex;flex-direction:column;gap:10px;min-height:0}.counter{font-size:clamp(10px,1vw,15px);font-weight:800;letter-spacing:.13em;color:#b8c9d6}.counter strong{color:#74dfb3}.card-holder{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}.card{width:100%;max-height:100%;min-height:64%;border:1px solid #5c7387;border-radius:20px;background:linear-gradient(130deg,#293e51,#172635);box-shadow:0 16px 40px #0004;padding:6% 7%;display:flex;flex-direction:column;justify-content:center;gap:12px;position:relative;touch-action:none;user-select:none;cursor:grab;transform:rotate(-1deg);transition:transform .3s,opacity .25s,border-color .2s}.card:hover{border-color:#a7bfd0;transform:rotate(0deg) translateY(-2px)}.card:active{cursor:grabbing}.card:before{content:'«';font-size:clamp(48px,6vw,86px);color:#ffffff14;font-weight:900;position:absolute;right:6%;top:-5px}.card .tag{color:#9cc6d8;font-size:clamp(9px,.7vw,11px);font-weight:800;letter-spacing:.11em}.card .statement{font-size:clamp(17px,1.62vw,28px);font-weight:800;line-height:1.34;letter-spacing:-.04em;margin:5px 0;position:relative}.card .hint{font-size:clamp(10px,.8vw,13px);font-weight:700;color:#a9c3d3;display:flex;align-items:center;gap:9px}.hint svg{width:17px;height:17px}.card.out{opacity:0;transform:scale(.8)}.card.in{animation:appear .48s both}@keyframes appear{from{opacity:0;transform:translateX(-35px) rotate(-5deg) scale(.95)}to{opacity:1;transform:rotate(-1deg)}}
+.zones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2%;min-height:0}.zone{border-radius:18px;border:1px dashed #607383;min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:12px;padding:10px 8px;background:#ffffff08;color:#f4f8fa;transition:background .22s,border .22s,transform .22s,box-shadow .22s}.zone .glyph{font-size:clamp(27px,2.65vw,42px);font-weight:400;line-height:1}.zone b{font-size:clamp(11px,1.05vw,17px);font-weight:900;line-height:1.35}.zone[data-zone=green]{background:linear-gradient(#5dce9b25,#5dce9b08);border-color:#5dce9b75}.zone[data-zone=yellow]{background:linear-gradient(#f6b95325,#f6b95307);border-color:#f6b95375}.zone[data-zone=red]{background:linear-gradient(#ef6b7424,#ef6b7408);border-color:#ef6b7475}.zone:hover:not(:disabled),.zone.over{border-style:solid;transform:translateY(-4px);filter:brightness(1.25)}.zone.selected{border:2px solid #fff;box-shadow:0 0 36px #ffffff18,inset 0 0 28px #ffffff10}.zone:disabled{cursor:default}.zone.reference{border-style:solid;box-shadow:inset 0 0 35px #ffffff16}
+.meter{flex:.52;min-height:0;display:flex;flex-direction:column;justify-content:center;padding:1.25% 2%;border-radius:19px;background:#111e2b;border:1px solid #33485b;gap:11px}.meter-top{display:flex;align-items:center;justify-content:space-between;gap:15px}.meter-top b{font-size:clamp(11px,.95vw,15px);letter-spacing:.035em}.meter-top span{font-size:clamp(10px,.72vw,12px);color:#9fb0c0}.scale{height:clamp(27px,3.25vw,50px);display:grid;grid-template-columns:repeat(24,minmax(0,1fr));border-radius:7px;overflow:hidden;position:relative;background:linear-gradient(90deg,#52bc87 0%,#8ed09a 20.833%,#e9c263 23%,#f5b35a 51%,#ee926b 62%,#e3666f 75%,#b94762 100%)}.cell{display:grid;place-items:center;border-right:1px solid #101d2435;color:#0b2634c9;font-size:clamp(8px,.73vw,12px);font-weight:800}.scale.blind{background:#35485a}.scale.blind .cell{color:transparent}.cell:last-of-type{border-right:0}.marker{position:absolute;top:0;bottom:0;width:4px;background:white;box-shadow:0 0 0 2px #20303d,0 0 17px #fff;z-index:1;transition:left .5s ease}.marker.hidden{opacity:0}.scale-labels{display:grid;grid-template-columns:5fr 11fr 8fr;font-size:clamp(9px,.76vw,12px);gap:8px;font-weight:900;letter-spacing:.02em}.scale-labels span:first-child{color:#6bdaab}.scale-labels span:nth-child(2){color:#ffce7e}.scale-labels span:last-child{color:#f08792}
+.feedback{flex:.34;min-height:0;border:1px solid #ffffff17;background:#ffffff0a;border-radius:15px;padding:1.4% 2%;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:background .25s}.feedback.idle{background:#ffffff04}.feedback .text{flex:1;min-width:0}.feedback .feedback-title{color:#a6b7c7;font-size:clamp(11px,.92vw,15px);font-weight:800;letter-spacing:.035em}.feedback .official{font-size:clamp(12px,1.1vw,19px);font-weight:700;line-height:1.3;margin-top:5px}.feedback .countdown{height:4px;width:80px;background:#516171;border-radius:9px;overflow:hidden;flex-shrink:0}.countdown span{display:block;background:#dde9ef;height:100%;width:100%;transform-origin:left;transform:scaleX(0)}.feedback.idle .countdown{display:none}.feedback.idle .official{color:#a2b2c0;font-weight:500}.foot{display:flex;align-items:center;justify-content:space-between;padding:0 4.2% 1.3%;position:relative;z-index:1;gap:15px}.dots{display:grid;grid-template-columns:repeat(24,1fr);gap:5px;width:45%;max-width:660px}.dot{height:5px;background:#334558;border-radius:6px}.dot.done{background:#65d6a6}.dot.current{background:#f4f8fa}.help{font-size:clamp(9px,.68vw,12px);color:#8ea3b5;text-align:right}.help strong{color:#c8d6e0}.help a{color:inherit}
+.fly{position:fixed;z-index:50;pointer-events:none;box-shadow:0 20px 80px #0008;transform-origin:center;will-change:transform,opacity}.end{position:absolute;z-index:10;inset:12% 4.2% 5%;border:1px solid #51677a;background:#101d2cf5;border-radius:20px;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5%;gap:24px}.end.show{display:flex}.end .big{font-size:clamp(25px,3.5vw,58px);font-weight:900;letter-spacing:-.06em}.end p{font-size:clamp(12px,1.15vw,19px);color:#b9c9d5;max-width:620px;line-height:1.6}.end button{border:1px solid #7c9baf;border-radius:40px;padding:13px 22px;background:#edf4f6;color:#132433;font-weight:800}.end .small{font-size:11px;color:#9eb0bf}
+
+/* V3 : action et récapitulatif intégrés à la composition horizontale */
+.header-actions{display:flex;align-items:center;gap:13px}.export-button{height:45px;border-radius:23px;border:1px solid #546477;background:#ffffff0c;color:#eff6fb;padding:0 18px;font-size:clamp(10px,.78vw,13px);font-weight:850;letter-spacing:.09em;display:flex;gap:9px;align-items:center}.export-button:hover{background:#ffffff1c}.card-holder.answered .card{display:none}.next-card{width:100%;height:87%;border:1px solid #607a8e;border-radius:20px;background:linear-gradient(135deg,#263e4a,#172632);color:#eaf8f3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;transition:transform .2s,background .2s}.next-card[hidden]{display:none}.next-card:hover{transform:translateY(-3px);background:linear-gradient(135deg,#355465,#1d3346)}.next-card span{font-size:clamp(10px,.85vw,14px);letter-spacing:.14em;color:#99d9b9;font-weight:750}.next-card b{font-size:clamp(20px,2.4vw,37px);letter-spacing:-.04em}.next-card b span{font-size:inherit;color:inherit}.feedback .comparison{display:flex;flex-direction:column;gap:8px;min-width:30%;align-items:flex-end}.comparison[hidden]{display:none}.comparison span{font-size:clamp(10px,.82vw,13px);font-weight:800;letter-spacing:.035em}.comparison .choice{color:#bacddd}.comparison .result{padding:6px 12px;border-radius:20px;font-size:clamp(10px,.78vw,13px);background:#ffffff10}.comparison .result.match{color:#7ee2b8;background:#4ab98920}.comparison .result.mismatch{color:#ffcf87;background:#ffc36a1b}.feedback .official{font-size:clamp(12px,1.04vw,18px)}
+.report-overlay{display:none;position:absolute;z-index:30;inset:0;background:radial-gradient(ellipse at 78% -20%,#263b4a,#0d1722 57%);padding:2.5% 4.2% 2.2%;flex-direction:column;gap:2%;overflow:hidden}.report-overlay.open{display:flex}.report-head{display:flex;justify-content:space-between;align-items:start;gap:20px}.report-eyebrow{font-size:clamp(10px,.82vw,14px);color:#89bcae;font-weight:850;letter-spacing:.14em}.report-head h2{margin:4px 0 4px;font-size:clamp(22px,2.35vw,40px);line-height:1;font-weight:900;letter-spacing:-.06em}.report-head p{margin:0;color:#a7bbc9;font-size:clamp(10px,.82vw,13px)}.close-report{border:1px solid #536a7c;color:#e8f5f9;background:#ffffff0a;border-radius:50%;height:45px;width:45px;font-size:29px;line-height:1}.report-controls{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.filters{display:flex;background:#ffffff0b;border:1px solid #435668;border-radius:30px;padding:4px;gap:3px}.filters button{border:0;border-radius:20px;background:transparent;color:#b1c3cf;padding:9px 16px;font-size:clamp(9px,.74vw,12px);font-weight:850}.filters button.active{background:#dcebf0;color:#142b3a}.report-actions{display:flex;gap:8px}.report-actions button{border:1px solid #546c80;border-radius:20px;padding:9px 14px;background:#192c3b;color:#e4f1f4;font-weight:800;font-size:clamp(9px,.72vw,12px)}.report-actions button:hover{background:#29475c}.report-grid{flex:1;min-height:0;display:grid;grid-template-columns:5fr 11fr 8fr;gap:1.2%}.report-band{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #ffffff28;border-radius:13px;overflow:hidden;background:#ffffff05}.report-band.green{border-color:#54c88b5a}.report-band.yellow{border-color:#e5b15a77}.report-band.red{border-color:#e57a8277}.report-band h3{font-size:clamp(10px,.82vw,14px);padding:11px 11px;margin:0;line-height:1.2;font-weight:900;letter-spacing:.07em}.report-band.green h3{background:#2c805a;color:#f3fff6}.report-band.yellow h3{background:#936a29;color:#fff8de}.report-band.red h3{background:#913b4a;color:#fff3f4}.report-items{display:grid;grid-template-rows:repeat(10,minmax(0,1fr));gap:4px;padding:7px;flex:1;min-height:0}.report-item{border:1px solid #ffffff19;background:#ffffff0b;display:flex;align-items:center;gap:7px;border-radius:6px;min-width:0;padding:2px 6px}.report-item.unplayed{opacity:.27;filter:grayscale(1)}.report-item.empty{opacity:0}.report-item .number{flex:0 0 22px;color:#bdced9;font-weight:900;font-size:clamp(9px,.7vw,12px);font-variant-numeric:tabular-nums}.report-item .desc{font-size:clamp(8px,.69vw,11.5px);font-weight:650;line-height:1.16;min-width:0;flex:1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.report-item .choicechip{flex:0 0 auto;border-radius:5px;padding:4px 5px;font-size:clamp(7px,.56vw,10px);font-weight:850;background:#ffffff16;color:#dfeaf0;white-space:nowrap}.report-item .choicechip.correct{background:#58b98d29;color:#77dfae}.report-item .choicechip.wrong{background:#ffb86b20;color:#ffc579}.report-legend{display:flex;align-items:center;gap:17px;font-size:clamp(8px,.65vw,11px);color:#a8becc;flex-wrap:wrap}.report-legend span{display:inline-flex;align-items:center;gap:6px}.report-legend .report-legend-right{margin-left:auto}.leg-dot{width:9px;height:9px;border-radius:50%;background:#cfe1ef}.leg-dot.match{background:#73dbaa}.leg-dot.mismatch{background:#ffc579}.end-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+@media(max-aspect-ratio:4/3){.report-overlay{position:fixed;padding:20px;overflow:auto}.report-grid{min-height:1050px}.report-items{grid-template-rows:repeat(10,minmax(70px,1fr))}.report-item .desc{font-size:11px}.report-controls{flex-direction:column;align-items:flex-start}.report-legend{padding-bottom:12px}}
+
+@media(max-aspect-ratio:4/3){body{display:block}.stage{width:100%;min-height:100svh;aspect-ratio:auto;overflow:visible}.top{padding:20px 5%}.content{padding:0 5% 20px;gap:14px}.game{display:flex;flex-direction:column;gap:14px}.card-holder{min-height:180px}.card{min-height:175px;padding:24px}.zones{min-height:150px}.meter{min-height:155px;padding:18px}.feedback{min-height:90px;padding:16px}.foot{padding:14px 5% 20px}.end{position:fixed;inset:10% 4%;}.card .statement{font-size:21px}.title{font-size:26px}}
+@media(max-width:540px){.zones{gap:6px}.zone{border-radius:13px;padding:12px 5px}.zone b{font-size:10px}.zone .glyph{font-size:24px}.scale-labels{font-size:8px}.meter-top span{display:none}.help{max-width:48%}.dots{width:47%;gap:3px}.dot{height:4px}.feedback .countdown{width:40px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* V4 : réponses lisibles, carte suivante à la place de la carte et curseur explicite */
+.card-holder.answered .next-card{display:flex;animation:appear .35s both;cursor:pointer}
+.card-holder:not(.answered) .next-card{display:none!important}
+.feedback{flex:.52;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.1% 2.5%;gap:5px}
+.feedback .text{width:100%}.feedback .feedback-title{font-size:clamp(14px,1.25vw,23px);font-weight:900;letter-spacing:0}
+.feedback .official{font-size:clamp(15px,1.45vw,26px);font-weight:600;line-height:1.35;margin-top:7px}
+.feedback .comparison{min-width:0;align-items:center;flex-direction:row;justify-content:center;flex-wrap:wrap;gap:10px}
+.comparison span{font-size:clamp(11px,.86vw,15px)}.comparison .result{font-size:clamp(11px,.9vw,15px);padding:6px 13px}
+.feedback.idle{visibility:hidden}
+.meter{flex:.46;gap:7px}
+.scale{overflow:visible}
+.cell:first-child{border-radius:7px 0 0 7px}.cell:nth-child(24){border-radius:0 7px 7px 0}
+.marker{width:5px;top:-8px;bottom:-8px;border-radius:3px;box-shadow:0 0 0 2px #102333,0 0 18px #fff;transition:left .45s}
+.marker:after{content:'▲';position:absolute;left:50%;top:100%;transform:translateX(-50%) rotate(180deg);font-size:15px;line-height:1;color:white}
+.next-card{height:100%;min-height:0}
+
+/* V6 – pictogrammes inspirés de Material Symbols : favorite, warning, report */
+.zone .glyph{display:grid;place-items:center;width:clamp(56px,6vw,94px);height:clamp(56px,6vw,94px);color:#fff;opacity:.98;filter:drop-shadow(0 2px 10px #0002)}
+.zone .glyph svg{display:block;width:100%;height:100%;overflow:visible}
+.zone{gap:clamp(8px,1.35vw,20px)}
+.zone[data-zone=green],.zone[data-zone=yellow],.zone[data-zone=red]{background:#ffffff08;border-color:#6a7b89}
+.zone[data-zone=green]:hover:not(:disabled),.zone[data-zone=yellow]:hover:not(:disabled),.zone[data-zone=red]:hover:not(:disabled){background:#ffffff12}
+.zone.selected{background:#ffffff14!important}.zone.reference{border-color:#fff}
+@media(max-width:540px){.zone .glyph{width:50px;height:50px}}
+
+
+/* V7 : typographie lisible à distance, 24 graduations distinctes et bilan clair */
+.top .title{font-size:clamp(21px,2.05vw,35px)!important}
+.counter{font-size:clamp(14px,1.08vw,20px)!important;letter-spacing:.09em}
+.card .tag{font-size:clamp(12px,.87vw,16px)!important}
+.card .statement{font-size:clamp(23px,1.8vw,34px)!important;line-height:1.28!important;letter-spacing:-.025em!important}
+.card .hint{font-size:clamp(12px,.89vw,17px)!important}
+.zone b{font-size:clamp(17px,1.25vw,23px)!important}
+.zone .glyph{width:clamp(62px,5.2vw,92px);height:clamp(62px,5.2vw,92px)}
+.meter-top b{font-size:clamp(14px,1vw,19px)!important}
+.meter-top span{font-size:clamp(12px,.95vw,17px)!important}
+.scale{height:clamp(48px,3.9vw,67px)!important;gap:0;border-radius:9px;overflow:visible!important;background:transparent!important}
+.cell{font-size:clamp(12px,.89vw,16px)!important;color:#182531!important;border-right:2px solid #111c29!important;position:relative}
+.cell:nth-child(-n+5){background:#79ca96}.cell:nth-child(n+6):nth-child(-n+16){background:#efbe6b}.cell:nth-child(n+17){background:#e4777b}
+.cell:first-child{border-radius:8px 0 0 8px}.cell:nth-child(24){border-radius:0 8px 8px 0;border-right:0!important}
+.scale.blind .cell{background:#32485a!important;color:#a4b6c3!important;opacity:.85}
+.scale.blind .marker{opacity:0}
+.marker{background:#fff;width:5px!important;top:-6px!important;bottom:-6px!important;z-index:3;border-radius:3px;box-shadow:0 0 0 2px #182532,0 0 20px #fff!important}
+.marker:after{content:'▼';top:-26px;left:50%;transform:translateX(-50%);position:absolute;color:white;font-size:21px;filter:drop-shadow(0 1px 2px #000)}
+.scale-labels{font-size:clamp(12px,.9vw,17px)!important}
+.feedback{min-height:0;gap:9px!important;padding:1.4% 2.5%!important}
+.feedback .feedback-title{font-size:clamp(18px,1.47vw,27px)!important;line-height:1.3!important}
+.feedback .official{font-size:clamp(20px,1.8vw,33px)!important;line-height:1.34!important;font-weight:650!important;letter-spacing:-.025em}
+.feedback.idle{visibility:visible!important;opacity:.12}
+.feedback.idle .text{visibility:hidden}
+.next-card b{font-size:clamp(24px,2.18vw,40px)!important}
+.next-card span{font-size:clamp(14px,1vw,19px)!important}
+.help{font-size:clamp(11px,.81vw,15px)!important}
+.report-overlay{z-index:40}
+
+/* V8 : transition discrète et retour centré */
+.next-card,.next-card:hover{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;transform:none!important;color:#f2f7fc!important;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:15px;font-size:clamp(22px,2.25vw,40px)!important;font-weight:800;letter-spacing:.01em;cursor:pointer}
+.next-card[hidden]{display:none!important}
+.next-card span{font-size:1.1em!important;color:#f2f7fc!important;font-weight:500}
+.next-card:hover{color:#91d9bf!important}.next-card:hover span{color:#91d9bf!important}
+.feedback,.feedback .text{display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important}
+.feedback .text{width:100%!important;gap:7px!important}
+.feedback .feedback-title{width:100%!important;text-align:center!important;font-size:clamp(17px,1.55vw,28px)!important}
+.feedback .official{width:100%!important;text-align:center!important;margin:0!important;font-size:clamp(19px,1.7vw,31px)!important}
+
+/* V9 — consultation des cartes jouées directement dans la frise */
+.marker{pointer-events:none}
+.export-button.active{background:#dfeef2;color:#112431;border-color:#dfeef2}
+.result-pair{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;column-gap:clamp(17px,2vw,38px);row-gap:8px;width:100%}
+.result-pair>span:not(.versus){white-space:nowrap}
+.result-pair strong{font-weight:900}
+.result-pair .versus{font-size:clamp(15px,1.2vw,21px);font-weight:900;letter-spacing:.12em;color:#ffca77;padding:0 clamp(8px,.8vw,15px)}
+.cell{border-right:1px solid #13253888}
+.scale.review-scale{overflow:visible}
+.review-mode .scale .cell{color:#16212b;border-right:1px solid #111c2888;transition:filter .15s,transform .15s,box-shadow .15s,font-size .15s}
+.review-mode .cell.unplayed{filter:brightness(.58) saturate(.55);font-size:clamp(8px,.73vw,12px);opacity:.6}
+.review-mode .cell.played{cursor:pointer;filter:none;font-size:clamp(14px,1.38vw,25px);font-weight:900;color:#10202c;position:relative;z-index:2}
+.review-mode .cell.played-green{background:#6bdaab!important;color:#10202c!important;box-shadow:inset 0 0 0 2px #dff8ec!important}
+.review-mode .cell.played-yellow{background:#ffce7e!important;color:#16212b!important;box-shadow:inset 0 0 0 2px #fff0bf!important}
+.review-mode .cell.played-red{background:#f08792!important;color:#1c1f26!important;box-shadow:inset 0 0 0 2px #ffd4d9!important}
+.review-mode .cell.played-green:hover,.review-mode .cell.played-green.focused{background:#85e5ba!important;color:#0d1b24!important;box-shadow:inset 0 0 0 3px #f4fff8!important;transform:translateY(-2px)}
+.review-mode .cell.played-yellow:hover,.review-mode .cell.played-yellow.focused{background:#ffd995!important;color:#121d27!important;box-shadow:inset 0 0 0 3px #fff8de!important;transform:translateY(-2px)}
+.review-mode .cell.played-red:hover,.review-mode .cell.played-red.focused{background:#f59ca6!important;color:#171a20!important;box-shadow:inset 0 0 0 3px #fff0f2!important;transform:translateY(-2px)}
+.review-mode .game{opacity:.26;pointer-events:none;filter:grayscale(.4)}
+.review-mode .meter{border-color:#7e9caf}
+.review-mode .meter-top span{color:#dceaf2}
+.review-mode .feedback{background:#ffffff10}
+@media(max-width:620px){.result-pair{column-gap:10px}.result-pair>span:not(.versus){white-space:normal}.result-pair .versus{padding:0 2px}}
+
+/* V14 — corrections ciblées des deux modes */
+.scale-labels{display:grid!important;grid-template-columns:5fr 11fr 8fr!important;gap:0!important;align-items:center!important}
+.scale-labels span{display:block;text-align:center!important;white-space:nowrap;font-size:clamp(10px,.85vw,16px)!important;letter-spacing:-.01em}
+.next-card:hover,.next-card:hover span{color:#9cc6d8!important}
+/* Seul le paquet choisi passe en bordure pleine ; les autres conservent le pointillé. */
+.zone:not(.selected),.zone.reference:not(.selected){border-style:dashed!important;border-width:1px!important;box-shadow:none!important}
+.zone.selected{border-style:solid!important;border-width:2px!important;box-shadow:0 0 36px #ffffff18,inset 0 0 28px #ffffff10!important}
+/* Le triangle et la barre verticale ne sont jamais affichés en consultation. */
+.review-mode .marker,.review-mode .marker:after{display:none!important}
+/* Les états de validation et les choix sont colorés selon leur propre zone. */
+.feedback-title .status-good{font-weight:900}
+.feedback-title .result-pair .choice-result,.feedback-title .result-pair .reference-result{font-weight:800}
+
+/* V15 — couleurs des pictogrammes et titres des paquets */
+.zone[data-zone="green"] .glyph,.zone[data-zone="green"] b{color:#81e5af!important}
+.zone[data-zone="yellow"] .glyph,.zone[data-zone="yellow"] b{color:#ffcb70!important}
+.zone[data-zone="red"] .glyph,.zone[data-zone="red"] b{color:#ff8892!important}
+/* Matérial Symbol fact_check intégré en SVG, sans dépendance réseau. */
+.export-button .fact-check-icon{display:block;width:21px;height:21px;flex-shrink:0}
+
+/* V19 — mode plein écran natif, sans modifier le jeu */
+.fullscreen-button{width:45px;height:45px;border-radius:50%;background:#ffffff0c;border:1px solid #546477;color:#eaf3f9;display:grid;place-items:center;flex-shrink:0;transition:background .2s}
+.fullscreen-button:hover{background:#ffffff22}
+.fullscreen-button svg{width:21px;height:21px}
+.fullscreen-button .exit-icon{display:none}
+.fullscreen-button.is-fullscreen .enter-icon{display:none}
+.fullscreen-button.is-fullscreen .exit-icon{display:block}
+.stage:fullscreen,.stage:-webkit-full-screen{width:100vw;height:100vh;max-width:none;aspect-ratio:auto;border:0;box-shadow:none}
+/* Secours pour les navigateurs qui refusent l’API Fullscreen sur un HTML local. */
+body.fullscreen-fallback{display:block;overflow:hidden}
+.stage.fullscreen-fallback-stage{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;aspect-ratio:auto;z-index:9999;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+ <header class="top"><div class="identity"><div class="title">LE VIOLENTOMÈTRE</div></div><div class="header-actions"><button class="export-button" id="export" title="Consulter le bilan des cartes jouées" aria-label="Consulter le bilan des cartes jouées"><span>BILAN</span></button><button class="fullscreen-button" id="fullscreen" type="button" title="Passer en plein écran" aria-label="Passer en plein écran" aria-pressed="false"><svg class="enter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5"/></svg><svg class="exit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg></button><button class="reset" id="reset" title="Recommencer" aria-label="Recommencer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11a9 9 0 1 1 2.6 6.4"/><path d="M3 4v7h7"/></svg></button></div></header>
+ <main class="content">
+  <div class="game"><div class="card-column"><div class="counter">SITUATION <strong id="num">01</strong> / 24</div><div class="card-holder"><div class="card" id="card" tabindex="0" role="group" aria-label="Situation à classer" draggable="true"><div class="tag">DANS UNE RELATION AMOUREUSE…</div><div class="statement" id="statement"></div><div class="hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 4 4 8l4 4M16 4l4 4-4 4M4 8h16M8 20l-4-4 4-4M16 20l4-4-4-4M4 16h16"/></svg> GLISSER LA CARTE</div></div><button class="next-card" id="next" hidden aria-label="Passer à la carte suivante">CARTE SUIVANTE</button></div></div>
+   <div class="zones" id="zones"><button class="zone" data-zone="green"><span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.1 5.1 0 0 0-7.2 0L12 7.2l-1.6-1.6a5.1 5.1 0 0 0-7.2 7.2L12 21l8.8-8.2a5.1 5.1 0 0 0 0-7.2Z"/></svg></span><b>RELATION<br>SAINE</b></button><button class="zone" data-zone="yellow"><span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.5a2 2 0 0 1 3.4 0l8.1 14a2 2 0 0 1-1.7 3H3.9a2 2 0 0 1-1.7-3z"/><path d="M12 9v5"/><circle cx="12" cy="17.4" r=".85" fill="currentColor" stroke="none"/></svg></span><b>VIGILANCE</b></button><button class="zone" data-zone="red"><span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8.4 2.5h7.2l5.9 5.9v7.2l-5.9 5.9H8.4l-5.9-5.9V8.4z"/><path d="M12 7v7"/><circle cx="12" cy="17.2" r=".85" fill="currentColor" stroke="none"/></svg></span><b>DANGER</b></button></div>
+  </div>
+  <section class="meter" aria-label="Le violentomètre horizontal"><div class="meter-top"><b>LE VIOLENTOMÈTRE <span style="color:#88a0b3">· 24 REPÈRES</span></b><span id="meterStatus">Référence masquée</span></div><div class="scale blind" id="scale"></div><div class="scale-labels"><span>RELATION SAINE · PROFITE</span><span>VIGILANCE · DIS STOP !</span><span>DANGER · DEMANDE DE L’AIDE</span></div></section>
+  <div class="feedback idle" id="feedback" aria-live="polite"><div class="text"><div class="feedback-title" id="feedbackTitle"></div><div class="official" id="official"></div></div><div class="comparison" id="comparison" hidden></div></div>
+ </main>
+ <footer class="foot"><div class="dots" id="dots" aria-label="Progression des 24 situations"></div><div class="help">Besoin d’aide : <strong>3919</strong> · Urgence : <strong>17 / 112</strong></div></footer>
+</div>
+<script>
+(()=>{
+'use strict';
+// Libellés du violentomètre, version du 27/08/2024 (Centre Hubertine Auclert).
+// Libellés intégralement repris de l'édition à 24 phrases (affiche Violentomètre).
+const labels=[
+'Respecte tes décisions et tes goûts',
+'Accepte tes ami.e.s et ta famille',
+'A confiance en toi',
+'Est content quand tu te sens épanouie',
+'S’assure de ton accord pour ce que vous faites ensemble',
+'T’ignore des jours quand il est en colère',
+'Te fait du chantage si tu refuses de faire quelque chose',
+'Rabaisse tes opinions et tes projets',
+'Se moque de toi en public',
+'Te manipule',
+'Est jaloux en permanence',
+'Contrôle tes sorties, habits, maquillage',
+'Fouille tes textos, mails, applis',
+'Insiste pour que tu envoies des photos intimes',
+'T’isole de ta famille et de tes ami.e.s',
+'Te traite de folle quand tu lui fais des reproches',
+'« Pète les plombs » lorsque quelque chose lui déplaît',
+'Menace de se suicider à cause de toi',
+'Menace de diffuser des photos intimes de toi',
+'Te pousse, te tire, te gifle, te secoue, te frappe',
+'Te touche les parties intimes sans ton consentement',
+'T’oblige à avoir des relations sexuelles',
+'Te menace avec une arme',
+'Te menace de mort'
+];
+const explanations=["La personne respecte tes choix, même lorsqu’elle a des goûts différents.", "Tu peux conserver tes amitiés et tes liens familiaux librement.", "La confiance ne demande ni surveillance ni preuve permanente.", "Elle se réjouit de ton épanouissement et de tes activités personnelles.", "Votre accord à tous les deux compte pour chaque activité partagée.", "Ignorer volontairement quelqu’un plusieurs jours pour le punir est une forme de pression.", "Le chantage cherche à obtenir quelque chose malgré un refus.", "Dévaloriser tes opinions ou tes projets fragilise ta confiance en toi.", "Se moquer de toi devant d’autres personnes peut être humiliant.", "Manipuler une personne revient à influencer ses choix en contournant sa volonté.", "La jalousie permanente ne justifie jamais de restreindre ta liberté.", "Contrôler tes sorties ou tes vêtements porte atteinte à ton autonomie.", "Fouiller tes messages et tes applications est une atteinte à ta vie privée.", "Insister pour obtenir des images intimes ne respecte pas ton consentement.", "T’isoler de tes proches peut augmenter ton sentiment de dépendance.", "Te faire passer pour folle afin de discréditer tes reproches est une violence psychologique.", "Des explosions de colère intimidantes installent un climat de peur.", "Menacer de se suicider pour te retenir fait peser sur toi une responsabilité injuste.", "Menacer de diffuser des photos intimes constitue un chantage grave.", "Pousser, tirer, gifler, secouer ou frapper sont des violences physiques.", "Toucher les parties intimes sans consentement constitue une violence sexuelle.", "Imposer des relations sexuelles constitue une violence sexuelle grave.", "Menacer avec une arme indique un danger majeur et nécessite une protection urgente.", "Une menace de mort doit toujours être prise au sérieux : cherche de l’aide et mets-toi en sécurité."];
+const $=id=>document.getElementById(id), card=$('card'), zones=[...document.querySelectorAll('.zone')];
+let order=[],index=0,busy=false,run=0,drag=null,ghost=null,history=[],viewMode=false,completed=false;
+const zoneFor=n=>n<=5?'green':n<=16?'yellow':'red';
+const names={green:'RELATION SAINE',yellow:'VIGILANCE',red:'DANGER'};
+const colors={green:'#81e5af',yellow:'#ffcb70',red:'#ff8892'};
+function shuffle(){const a=Array.from({length:24},(_,i)=>i);for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function buildScale(){let h='';for(let n=1;n<=24;n++)h+=`<span class="cell" data-n="${n}">${n}</span>`;h+='<div class="marker hidden" id="marker"></div>';$('scale').innerHTML=h;}
+function dots(){ $('dots').innerHTML=order.map((_,i)=>`<span class="dot ${i<index?'done':i===index?'current':''}"></span>`).join('');}
+function showCard(){
+ const n=order[index];busy=false;
+ $('card').parentElement.classList.remove('answered');$('next').hidden=true;
+ card.style.display='';card.classList.remove('out','in');void card.offsetWidth;card.classList.add('in');
+ $('statement').textContent=labels[n];$('num').textContent=String(index+1).padStart(2,'0');
+ $('scale').classList.add('blind');$('marker').classList.add('hidden');
+ $('meterStatus').textContent='Référence masquée';$('feedback').classList.add('idle');
+ $('feedbackTitle').textContent='';$('official').textContent='';$('comparison').hidden=true;$('comparison').innerHTML='';
+ zones.forEach(z=>{z.classList.remove('selected','reference','over');z.disabled=false;});dots();
+}
+function next(){if(!$('card').parentElement.classList.contains('answered'))return;
+ $('next').hidden=true;
+ if(++index>=24){completed=true;busy=true;card.parentElement.classList.remove('answered');card.style.display='none';$('next').hidden=true;$('num').textContent='24';$('meterStatus').textContent='24 SITUATIONS EXPLORÉES';$('feedbackTitle').textContent='24 SITUATIONS EXPLORÉES';$('official').textContent='Clique sur BILAN pour retrouver tes choix dans les 24 repères.';$('feedback').classList.remove('idle');$('marker').classList.add('hidden');dots();return;}
+ showCard();}
+function feedbackHeader(chosen,ref,match){
+ const choiceColor=colors[chosen],refColor=colors[ref];
+ if(match)return `<span class="status-good" style="color:${refColor}">✓ BON CLASSEMENT · ${names[ref]}</span>`;
+ return `<span class="result-pair"><span class="choice-result" style="color:${choiceColor}">TON CHOIX : <strong>${names[chosen]}</strong></span><span class="versus" style="color:${refColor}">VS</span><span class="reference-result" style="color:${refColor}">RÉFÉRENCE : <strong>${names[ref]}</strong></span></span>`;
+}
+function reveal(zone){
+ if(!$('card').parentElement || index>=24)return;
+ const n=order[index]+1,ref=zoneFor(n),match=zone===ref;
+ history.push({id:n,chosen:zone,ref,match});
+ $('scale').classList.remove('blind');$('marker').style.left=`${((n-.5)/24)*100}%`;
+ $('marker').classList.remove('hidden');$('meterStatus').textContent=`REPÈRE OFFICIEL N° ${n} / 24`;
+ $('feedback').classList.remove('idle');
+ $('feedbackTitle').innerHTML=feedbackHeader(zone,ref,match);
+ $('feedbackTitle').style.color='#f2f5f8';
+ $('official').textContent=`${labels[n-1]} : ${explanations[n-1]}`;
+ zones.forEach(z=>{z.disabled=true;if(z.dataset.zone===zone)z.classList.add('selected');});
+ $('comparison').hidden=true;
+ $('next').hidden=false;card.parentElement.classList.add('answered');dots();
+}
+
+function choose(zone,target=null){if(busy)return;const token=run;busy=true;card.classList.remove('in');zones.forEach(z=>z.classList.remove('over'));const dst=target||zones.find(z=>z.dataset.zone===zone);const start=card.getBoundingClientRect(),end=dst.getBoundingClientRect();const clone=card.cloneNode(true);clone.removeAttribute('id');clone.className='card fly';Object.assign(clone.style,{left:start.left+'px',top:start.top+'px',width:start.width+'px',height:start.height+'px',minHeight:'0',maxHeight:'none',margin:'0',transform:'rotate(-1deg)'});document.body.appendChild(clone);card.classList.add('out');const anim=clone.animate([{left:start.left+'px',top:start.top+'px',transform:'rotate(-1deg) scale(1)',opacity:1},{left:(end.left+(end.width-start.width)/2)+'px',top:(end.top+(end.height-start.height)/2)+'px',transform:'rotate(4deg) scale(.43)',opacity:.1}],{duration:480,easing:'cubic-bezier(.2,.8,.2,1)',fill:'forwards'});anim.finished.then(()=>clone.remove()).catch(()=>clone.remove());setTimeout(()=>{if(run===token)reveal(zone);},490);}
+function restart(){run++;history=[];completed=false;viewMode=false;$('stage').classList.remove('review-mode');$('export').classList.remove('active');$('export').querySelector('span').textContent='BILAN';$('export').setAttribute('aria-label','Consulter le bilan des cartes jouées');document.querySelectorAll('.cell').forEach(c=>c.classList.remove('played','unplayed','focused','played-green','played-yellow','played-red'));if(ghost){ghost.remove();ghost=null;}document.querySelectorAll('.fly').forEach(x=>x.remove());drag=null;order=shuffle();index=0;busy=false;showCard();}
+zones.forEach(el=>{el.addEventListener('click',()=>choose(el.dataset.zone,el));el.addEventListener('dragover',e=>{if(busy)return;e.preventDefault();el.classList.add('over');});el.addEventListener('dragleave',()=>el.classList.remove('over'));el.addEventListener('drop',e=>{e.preventDefault();el.classList.remove('over');choose(el.dataset.zone,el);});});
+card.addEventListener('dragstart',e=>{if(busy){e.preventDefault();return;}if(drag){e.preventDefault();return;}e.dataTransfer.setData('text/plain','card');e.dataTransfer.effectAllowed='move';});
+// Tactile : le doigt entraîne une copie de la carte ; les zones restent aussi cliquables.
+card.addEventListener('pointerdown',e=>{if(busy||e.pointerType==='mouse')return;drag={id:e.pointerId,startX:e.clientX,startY:e.clientY};card.setPointerCapture(e.pointerId);});
+card.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const moved=Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY);if(moved<8&&!ghost)return;if(!ghost){const r=card.getBoundingClientRect();ghost=card.cloneNode(true);ghost.removeAttribute('id');Object.assign(ghost.style,{position:'fixed',zIndex:'100',pointerEvents:'none',width:r.width+'px',height:r.height+'px',minHeight:'0',left:r.left+'px',top:r.top+'px',margin:'0',opacity:'.9',transform:'rotate(3deg) scale(.85)'});document.body.appendChild(ghost);}const r=ghost.getBoundingClientRect();ghost.style.left=e.clientX-r.width/2+'px';ghost.style.top=e.clientY-r.height/2+'px';let el=document.elementFromPoint(e.clientX,e.clientY)?.closest('.zone');zones.forEach(z=>z.classList.toggle('over',z===el));});
+function finish(e){if(!drag)return;drag=null;ghost?.remove();ghost=null;const el=document.elementFromPoint(e.clientX,e.clientY)?.closest('.zone');zones.forEach(z=>z.classList.remove('over'));if(el&&!busy)choose(el.dataset.zone,el);}
+card.addEventListener('pointerup',finish);card.addEventListener('pointercancel',finish);
+// Le mode « Voir » utilise la même frise, sans ouverture d'une deuxième page.
+function showHistory(n){
+ const rec=history.find(item=>item.id===n);
+ if(!rec)return;
+ $('meterStatus').textContent=`REPÈRE ${n} / 24 · CARTE JOUÉE`;
+ $('marker').classList.add('hidden');
+ $('feedback').classList.remove('idle');
+ $('feedbackTitle').innerHTML=feedbackHeader(rec.chosen,rec.ref,rec.match);
+ $('feedbackTitle').style.color='#f2f5f8';
+ $('official').textContent=`${labels[n-1]} : ${explanations[n-1]}`;
+ document.querySelectorAll('.cell').forEach((cell,i)=>cell.classList.toggle('focused',i+1===n));
+}
+function enableView(){
+ if(!history.length)return;
+ viewMode=true;
+ $('stage').classList.add('review-mode');
+ $('export').classList.add('active');
+ $('export').querySelector('span').textContent='RETOUR';$('export').setAttribute('aria-label','Revenir au jeu');
+ $('scale').classList.remove('blind');
+ $('marker').classList.add('hidden');
+ $('meterStatus').textContent=`${history.length} CARTE${history.length>1?'S':''} JOUÉE${history.length>1?'S':''} · CLIQUE SUR UN NUMÉRO`;
+ const played=new Set(history.map(h=>h.id));
+ document.querySelectorAll('.cell').forEach((cell,i)=>{
+  let done=played.has(i+1);
+  cell.classList.toggle('played',done);
+  cell.classList.toggle('unplayed',!done);
+  cell.classList.remove('focused','played-green','played-yellow','played-red');
+  if(done){ const band=zoneFor(i+1); cell.classList.add(`played-${band}`); }
+  cell.setAttribute('aria-label',done?`Revoir le repère ${i+1}`:`Repère ${i+1}, non joué`);
+  cell.tabIndex=done?0:-1;
+  cell.setAttribute('role',done?'button':'presentation');
+ });
+ $('feedback').classList.remove('idle');
+ $('feedbackTitle').textContent='CARTES JOUÉES';
+ $('feedbackTitle').style.color='#edf4f8';
+ $('official').textContent='Sélectionne un repère mis en évidence pour revoir ton choix et la référence.';
+}
+function disableView(){
+ viewMode=false;
+ $('stage').classList.remove('review-mode');
+ $('export').classList.remove('active');
+ $('export').querySelector('span').textContent='BILAN';$('export').setAttribute('aria-label','Consulter le bilan des cartes jouées');
+ document.querySelectorAll('.cell').forEach(cell=>{cell.classList.remove('played','unplayed','focused','played-green','played-yellow','played-red');cell.removeAttribute('role');cell.removeAttribute('aria-label');cell.removeAttribute('tabindex');});
+ if(completed){
+  $('marker').classList.add('hidden');
+  $('meterStatus').textContent='24 SITUATIONS EXPLORÉES';
+  $('feedbackTitle').textContent='24 SITUATIONS EXPLORÉES';
+  $('feedbackTitle').style.color='#edf4f8';
+  $('official').textContent='Clique sur BILAN pour retrouver tes choix dans les 24 repères.';
+ } else if($('card').parentElement.classList.contains('answered')){
+  const rec=history[history.length-1];
+  $('scale').classList.remove('blind');
+  $('marker').style.left=`${((rec.id-.5)/24)*100}%`;
+  $('marker').classList.remove('hidden');
+  $('meterStatus').textContent=`REPÈRE OFFICIEL N° ${rec.id} / 24`;
+  $('feedbackTitle').innerHTML=feedbackHeader(rec.chosen,rec.ref,rec.match);
+  $('feedbackTitle').style.color='#f2f5f8';
+  $('official').textContent=`${labels[rec.id-1]} : ${explanations[rec.id-1]}`;
+ } else {
+  $('scale').classList.add('blind');
+  $('marker').classList.add('hidden');
+  $('meterStatus').textContent='Référence masquée';
+  $('feedback').classList.add('idle');
+  $('feedbackTitle').textContent='';
+  $('official').textContent='';
+ }
+}
+$('export').addEventListener('click',()=>viewMode?disableView():enableView());
+$('scale').addEventListener('click',e=>{
+ if(!viewMode)return;
+ const cell=e.target.closest('.cell');
+ if(cell?.classList.contains('played'))showHistory(Number(cell.dataset.n));
+});
+$('scale').addEventListener('keydown',e=>{
+ if(!viewMode||(e.key!=='Enter'&&e.key!==' '))return;
+ const cell=e.target.closest('.cell');
+ if(cell?.classList.contains('played')){e.preventDefault();showHistory(Number(cell.dataset.n));}
+});
+$('next').addEventListener('click',next);
+$('reset').addEventListener('click',restart);
+// Bouton plein écran : API navigateur, ou agrandissement dans la fenêtre en secours.
+const fullscreenButton=$('fullscreen');
+const stageForFullscreen=$('stage');
+let fallbackFullscreen=false;
+function fullscreenElement(){return document.fullscreenElement || document.webkitFullscreenElement || null;}
+function syncFullscreenButton(){
+ const active=Boolean(fullscreenElement()) || fallbackFullscreen;
+ fullscreenButton.classList.toggle('is-fullscreen',active);
+ fullscreenButton.setAttribute('aria-pressed',String(active));
+ fullscreenButton.setAttribute('aria-label',active?'Quitter le plein écran':'Passer en plein écran');
+ fullscreenButton.title=active?'Quitter le plein écran':'Passer en plein écran';
+}
+function setFallbackFullscreen(enabled){
+ fallbackFullscreen=enabled;
+ document.body.classList.toggle('fullscreen-fallback',enabled);
+ stageForFullscreen.classList.toggle('fullscreen-fallback-stage',enabled);
+ syncFullscreenButton();
+}
+fullscreenButton.addEventListener('click',()=>{
+ if(fallbackFullscreen){setFallbackFullscreen(false);return;}
+ if(fullscreenElement()){
+  try{
+   const exit=document.exitFullscreen || document.webkitExitFullscreen;
+   if(exit){Promise.resolve(exit.call(document)).catch(()=>setFallbackFullscreen(false));}
+   else setFallbackFullscreen(false);
+  }catch(e){setFallbackFullscreen(false);}
+  return;
+ }
+ const request=stageForFullscreen.requestFullscreen || stageForFullscreen.webkitRequestFullscreen;
+ if(!request){setFallbackFullscreen(true);return;}
+ try{
+  Promise.resolve(request.call(stageForFullscreen)).then(syncFullscreenButton).catch(()=>setFallbackFullscreen(true));
+ }catch(e){setFallbackFullscreen(true);}
+});
+document.addEventListener('fullscreenchange',syncFullscreenButton);
+document.addEventListener('webkitfullscreenchange',syncFullscreenButton);
+document.addEventListener('keydown',e=>{if(e.key==='Escape' && fallbackFullscreen)setFallbackFullscreen(false);});
+
+buildScale();restart();
+})();
+
+</script>
+</body>
+</html>
+
+<!-- Pictogrammes cohérents avec Google Material Symbols, intégrés en SVG pour un usage sans connexion. -->
